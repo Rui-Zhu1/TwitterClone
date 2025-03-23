@@ -1,7 +1,7 @@
 # X Clone
 ![thumbnail](https://github.com/Chevinjeon/TwitterClone/assets/109643560/bdf7c576-360d-4500-bb69-e75b22627c29)
 
-With Twitter's recent rebranding to X, this platform now has the largest user base ever for limitless interactivity.
+With the latest Twitter's recent rebranding to X, this platform now has the largest user base ever for limitless interactivity.
 In homage to the iconic bird, I ventured to construct my own social network. Armed with Android development and the elegance of Kotlin, I harnessed the Firebase APIs as the backbone of my network's infrastructure. This enabled seamless user management, login and signout functionalities, user profiles, tweets and retweets, home activities, and fragment screens. 
 
 
