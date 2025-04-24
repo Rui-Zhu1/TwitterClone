@@ -60,7 +60,6 @@
             android:gravity="center"
             android:textSize="14sp"/>
     </LinearLayout>
-
     <!-- EditText for the comment (Initially hidden) -->
     <EditText
         android:id="@+id/commentInput"
@@ -143,10 +142,10 @@
                 android:id="@+id/tweetComment"
                 android:layout_width="@dimen/small_image"
                 android:layout_height="@dimen/small_image"
-                android:src="@drawable/ic_comment"
                 android:background="@null"
                 android:padding="@dimen/grid1"
-                android:scaleType="centerInside"/>
+                android:scaleType="centerInside"
+                android:src="@drawable/ic_comment" />
         </LinearLayout>
     </LinearLayout>
 

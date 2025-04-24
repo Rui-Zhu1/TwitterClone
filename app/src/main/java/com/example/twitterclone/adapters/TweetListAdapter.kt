@@ -1,6 +1,7 @@
 package com.example.twitterclone.adapters
 
 import android.util.Log
+import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -35,6 +36,51 @@ class TweetListAdapter(
     fun getTweets(): List<Tweet> {
         return tweets
     }
+    companion object {
+        // Static method to load comments for a specific tweet
+        fun loadCommentsForTweet(tweetId: String, commentArea: LinearLayout) {
+            val db = FirebaseFirestore.getInstance()
+            commentArea.removeAllViews() // Clear previous comments
+
+            db.collection("comments")
+                .whereEqualTo("tweetId", tweetId)
+                .get()
+                .addOnSuccessListener { result ->
+                    for (document in result) {
+                        val commentText = document.getString("commentText") ?: "No comment"
+                        val userId = document.getString("userId") ?: "Anonymous"
+
+                        // Now fetch the username from the Users collection
+                        db.collection("Users").document(userId).get()
+                            .addOnSuccessListener { userDoc ->
+                                val usernameEmail = userDoc.getString("username") ?: "unknown@example.com"
+                                val username = usernameEmail.substringBefore("@") // Remove @example.com
+
+                                val commentView = TextView(commentArea.context).apply {
+                                    text = "$username: $commentText"
+                                    textSize = 14f
+                                    setTextColor(ContextCompat.getColor(commentArea.context, android.R.color.black))
+                                    gravity = Gravity.START
+                                    layoutParams = LinearLayout.LayoutParams(
+                                        LinearLayout.LayoutParams.MATCH_PARENT,
+                                        LinearLayout.LayoutParams.WRAP_CONTENT
+                                    ).apply {
+                                        setMargins(8, 8, 8, 8)
+                                    }
+                                }
+
+                                commentArea.addView(commentView)
+                            }
+                            .addOnFailureListener { e ->
+                                Log.e("TweetListAdapter", "Failed to get username: ${e.message}")
+                            }
+                    }
+                }
+                .addOnFailureListener { e ->
+                    Log.e("TweetListAdapter", "Error loading comments: ${e.message}")
+                }
+        }
+    }
 
     // Control visibility of the comment icon
     fun setCommentIconVisibility(show: Boolean) {
@@ -54,6 +100,7 @@ class TweetListAdapter(
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) = TweetViewHolder(
         LayoutInflater.from(parent.context).inflate(R.layout.item_tweet, parent, false)
     )
+
 
     // Return item count
     override fun getItemCount() = tweets.size
@@ -90,18 +137,27 @@ class TweetListAdapter(
             likeCount.text = tweet.likes.size.toString()
             retweetCount.text = tweet.retweets.size.toString()
 
+            // Initially hide the comment area
+            commentArea.visibility = View.GONE
+
             // Show or hide the comment icon based on visibility flag
             comment.visibility = if (showComment) View.VISIBLE else View.GONE
             comment.setOnClickListener {
-                commentArea.visibility = if (commentArea.visibility == View.GONE) View.VISIBLE else View.GONE
-                // When comment icon is clicked, show the comment input field
-                commentInput.visibility = View.VISIBLE
+                // Toggle visibility of the comment area
+                val isVisible = commentArea.visibility == View.VISIBLE
 
-                // Pre-fill the comment input with the previously typed comment
-                commentInput.setText(currentCommentText)
+                // If it's not already visible, load the comments first
+                if (!isVisible) {
+                    commentArea.visibility = View.VISIBLE
+                    // Load the comments for the tweet
+                    TweetListAdapter.loadCommentsForTweet(tweet.tweetId, commentArea)
+                }
+
+                // If it's already visible, show the input field
+                commentInput.visibility = if (commentInput.visibility == View.GONE) View.VISIBLE else View.GONE
             }
 
-            // Listen for the comment input field "done" action (Enter key)
+            // Handle the action when user types a comment
             commentInput.setOnEditorActionListener { v, actionId, event ->
                 val commentText = v.text.toString()
                 if (commentText.isNotEmpty()) {
