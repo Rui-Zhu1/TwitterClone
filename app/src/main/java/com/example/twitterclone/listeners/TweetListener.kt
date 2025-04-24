@@ -6,4 +6,5 @@ interface TweetListener {
     fun onLayoutClick(tweet: Tweet?)
     fun onLike(tweet: Tweet?)
     fun onRetweet(tweet: Tweet?)
+    fun onComment(tweet: Tweet)
 }

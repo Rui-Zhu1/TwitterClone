@@ -15,5 +15,6 @@ val DATA_TWEETS = "Tweets"
 val DATA_TWEET_USER_IDS = "userIds"
 val DATA_TWEET_HASHTAGS = "hashtags"
 val DATA_TWEETS_LIKES = "likes"
-
+val DATA_TWEETS_RETWEETS = "retweets" // Added
+val DATA_COMMENTS = "Comments"
 val DATA_TWEET_IMAGES = "TweetImages"

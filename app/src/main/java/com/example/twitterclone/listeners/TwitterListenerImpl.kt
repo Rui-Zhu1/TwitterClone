@@ -1,15 +1,36 @@
 package com.example.twitterclone.listeners
 
 import android.app.AlertDialog
+import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
+import com.example.twitterclone.R
 import com.example.twitterclone.utils.*
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 
-class TwitterListenerImpl(val tweetList: RecyclerView, var user: User?, val callback: HomeCallback?) : TweetListener {
+class TwitterListenerImpl(
+    private val tweetList: RecyclerView,
+    var user: User?,
+    private val callback: HomeCallback?
+) : TweetListener {
 
     private val firebaseDB = FirebaseFirestore.getInstance()
     private val userId = FirebaseAuth.getInstance().currentUser?.uid
+
+
+    override fun onComment(tweet: Tweet) {
+        // Handle the comment action
+        // For example, we show a simple Toast message for now,
+        // but in a real app, you'd likely navigate to a comment screen or show a comment input bar
+
+        // Show a Toast (you can replace this with actual UI changes)
+        Toast.makeText(tweetList?.context, "Comment clicked on tweet: ${tweet.text}", Toast.LENGTH_SHORT).show()
+
+        // Optionally: Show an input bar for the user to type a comment
+        // You could make a view visible for typing a comment here in the activity or fragment
+        // This part depends on your app structure
+    }
+
 
     override fun onLayoutClick(tweet: Tweet?) {
         tweet?.let {
@@ -70,12 +91,13 @@ class TwitterListenerImpl(val tweetList: RecyclerView, var user: User?, val call
         tweet?.let {
             tweetList.isClickable = false
             val likes = tweet.likes
-            if (tweet.likes?.contains(userId) == true) {
-                likes?.remove(userId)
+            if (likes.contains(userId)) {
+                likes.remove(userId)
             } else {
-                likes?.add(userId!!)
+                likes.add(userId!!)
             }
-            firebaseDB.collection(DATA_TWEETS).document(tweet.tweetId!!).update(DATA_TWEETS_LIKES, likes)
+            firebaseDB.collection(DATA_TWEETS).document(tweet.tweetId)
+                .update(DATA_TWEETS_LIKES, likes)
                 .addOnSuccessListener {
                     tweetList.isClickable = true
                     callback?.onRefresh()
@@ -89,13 +111,14 @@ class TwitterListenerImpl(val tweetList: RecyclerView, var user: User?, val call
     override fun onRetweet(tweet: Tweet?) {
         tweet?.let {
             tweetList.isClickable = false
-            val retweets = tweet.userIds
-            if (retweets?.contains(userId) == true) {
-                retweets?.remove(userId)
+            val retweets = tweet.retweets
+            if (retweets.contains(userId)) {
+                retweets.remove(userId)
             } else {
-                retweets?.add(userId!!)
+                retweets.add(userId!!)
             }
-            firebaseDB.collection(DATA_TWEETS).document(tweet.tweetId!!).update(DATA_TWEET_USER_IDS, retweets)
+            firebaseDB.collection(DATA_TWEETS).document(tweet.tweetId)
+                .update(DATA_TWEETS_RETWEETS, retweets)
                 .addOnSuccessListener {
                     tweetList.isClickable = true
                     callback?.onRefresh()

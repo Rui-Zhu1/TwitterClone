@@ -10,6 +10,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 
 abstract class TwitterFragment : Fragment() {
+
     protected var tweetsAdapter: TweetListAdapter? = null
     protected var currentUser: User? = null
     protected val firebaseDB = FirebaseFirestore.getInstance()
@@ -17,13 +18,12 @@ abstract class TwitterFragment : Fragment() {
     protected var listener: TwitterListenerImpl? = null
     protected var callback: HomeCallback? = null
 
-
     override fun onAttach(context: Context) {
         super.onAttach(context)
-        if(context is HomeCallback) {
-            callback = context
-        } else {
-            throw RuntimeException(context.toString() + " must implement HomeCallback")
+        try {
+            callback = context as HomeCallback
+        } catch (e: ClassCastException) {
+            throw ClassCastException("$context must implement HomeCallback")
         }
     }
 

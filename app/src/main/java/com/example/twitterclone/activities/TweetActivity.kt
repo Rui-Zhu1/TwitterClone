@@ -6,12 +6,14 @@ import android.content.Intent
 import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.widget.Toast
+import com.example.twitterclone.BuildConfig
 import com.example.twitterclone.R
 import com.example.twitterclone.utils.*
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.FirebaseStorage
 import kotlinx.android.synthetic.main.activity_tweet.*
 
@@ -27,31 +29,59 @@ class TweetActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_tweet)
 
-        if(intent.hasExtra(PARAM_USER_ID) && intent.hasExtra(PARAM_USER_NAME)) {
+        if (intent.hasExtra(PARAM_USER_ID) && intent.hasExtra(PARAM_USER_NAME)) {
             userId = intent.getStringExtra(PARAM_USER_ID)
             userName = intent.getStringExtra(PARAM_USER_NAME)
         } else {
-            Toast.makeText( this, "Error creating tweet", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "Error creating tweet", Toast.LENGTH_SHORT).show()
             finish()
         }
-        tweetProgressLayout.setOnTouchListener{v, event -> true}
+        tweetProgressLayout.setOnTouchListener { v, event -> true }
     }
+
+    fun getPost(keyword: String) {
+        tweetProgressLayout.visibility = View.VISIBLE
+
+        firebaseDB.collection(DATA_TWEETS)
+            .get()
+            .addOnSuccessListener { documents ->
+                tweetProgressLayout.visibility = View.GONE
+                val keywordLower = keyword.lowercase()
+                val tweetList = documents.mapNotNull { it.toObject(Tweet::class.java) }
+                    .filter { it.text.lowercase().contains(keywordLower) }
+
+                if (tweetList.isNotEmpty()) {
+                    for (tweet in tweetList) {
+                        Log.d("MatchedTweet", tweet.text)
+                    }
+                    Toast.makeText(this, "Found ${tweetList.size} tweets with \"$keyword\"", Toast.LENGTH_SHORT).show()
+                } else {
+                    Toast.makeText(this, "No tweets found for \"$keyword\"", Toast.LENGTH_SHORT).show()
+                }
+            }
+            .addOnFailureListener {
+                tweetProgressLayout.visibility = View.GONE
+                Toast.makeText(this, "Failed to search tweets.", Toast.LENGTH_SHORT).show()
+                it.printStackTrace()
+            }
+    }
+
 
     fun addImage(v: View) {
         val intent = Intent(Intent.ACTION_PICK)
         intent.type = "image/*"
         startActivityForResult(intent, REQUEST_CODE_PHOTO)
     }
+
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        if(resultCode == Activity.RESULT_OK && requestCode == REQUEST_CODE_PHOTO) {
+        if (resultCode == Activity.RESULT_OK && requestCode == REQUEST_CODE_PHOTO) {
             storeImage(data?.data)
         }
     }
 
-    // update the database with the correct URL
-    fun storeImage(imageUri: Uri?){
-        imageUri?.let{
+    fun storeImage(imageUri: Uri?) {
+        imageUri?.let {
             Toast.makeText(this, "Uploading...", Toast.LENGTH_SHORT).show()
             tweetProgressLayout.visibility = View.VISIBLE
 
@@ -59,14 +89,14 @@ class TweetActivity : AppCompatActivity() {
             filePath.putFile(imageUri)
                 .addOnSuccessListener {
                     filePath.downloadUrl
-                        .addOnSuccessListener {uri ->
+                        .addOnSuccessListener { uri ->
                             val url = uri.toString()
                             firebaseDB.collection(DATA_USERS).document(userId!!).update(
-                                DATA_USER_IMAGE_URL, url)
-                                .addOnSuccessListener {
-                                    imageUrl = uri.toString()
-                                    tweetImage.loadUrl(imageUrl, R.drawable.logo)
-                                }
+                                DATA_USER_IMAGE_URL, url
+                            ).addOnSuccessListener {
+                                imageUrl = uri.toString()
+                                tweetImage.loadUrl(imageUrl, R.drawable.logo)
+                            }
                             tweetProgressLayout.visibility = View.GONE
                         }
                         .addOnFailureListener {
@@ -80,7 +110,7 @@ class TweetActivity : AppCompatActivity() {
     }
 
     fun onUploadFailure() {
-        Toast.makeText(this, "Image upload failed. Please try agail later.", Toast.LENGTH_SHORT).show()
+        Toast.makeText(this, "Image upload failed. Please try again later.", Toast.LENGTH_SHORT).show()
         tweetProgressLayout.visibility = View.GONE
     }
 
@@ -90,7 +120,16 @@ class TweetActivity : AppCompatActivity() {
         val hashtags = getHashtags(text)
 
         val tweetId = firebaseDB.collection(DATA_TWEETS).document()
-        val tweet = Tweet(tweetId.id, arrayListOf(userId!!), userName, text, imageUrl, System.currentTimeMillis(), hashtags, arrayListOf())
+        val tweet = Tweet(
+            tweetId = tweetId.id,
+            userIds = arrayListOf(userId!!),
+            username = FirebaseAuth.getInstance().currentUser?.email?.substringBefore("@") ?: "Unknown",
+            text = text,
+            timestamp = System.currentTimeMillis(),
+            hashtags = hashtags,
+            likes = arrayListOf(),
+            retweets = arrayListOf()
+        )
         tweetId.set(tweet)
             .addOnCompleteListener { finish() }
             .addOnFailureListener { e ->
@@ -99,7 +138,6 @@ class TweetActivity : AppCompatActivity() {
                 Toast.makeText(this, "Failed to post the tweet.", Toast.LENGTH_SHORT).show()
             }
     }
-
 
     fun getHashtags(source: String): ArrayList<String> {
         val hashtags = arrayListOf<String>()
@@ -113,7 +151,7 @@ class TweetActivity : AppCompatActivity() {
             val firstSpace = text.indexOf(" ")
             val firstHash = text.indexOf("#")
 
-            if(firstSpace == -1 && firstHash == -1) {
+            if (firstSpace == -1 && firstHash == -1) {
                 hashtag = text.substring(0)
             } else if (firstSpace != -1 && firstSpace < firstHash) {
                 hashtag = text.substring(0, firstSpace)
@@ -123,14 +161,13 @@ class TweetActivity : AppCompatActivity() {
                 text = text.substring(firstHash)
             }
 
-            if(!hashtag.isNullOrEmpty()) {
+            if (!hashtag.isNullOrEmpty()) {
                 hashtags.add(hashtag)
             }
         }
 
         return hashtags
     }
-
 
     companion object {
         val PARAM_USER_ID = "UserId"

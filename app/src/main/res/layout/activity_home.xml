@@ -9,38 +9,38 @@
     <androidx.cardview.widget.CardView
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        app:cardElevation="4dp"
-        android:background="@color/colorPrimary"
+        app:cardElevation="0dp"
+        android:background="@android:color/transparent"
         android:orientation="horizontal"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         android:id="@+id/cardView">
 
-    <androidx.cardview.widget.CardView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_margin="@dimen/grid1"
-        app:cardCornerRadius="@dimen/standard_corner_radius">
-        
-        <ImageView
-            android:id="@+id/logo"
-            android:layout_width="@dimen/standard_image"
-            android:layout_height="@dimen/standard_image"
-            android:scaleType="centerCrop"
-            android:src="@drawable/default_user"/>
+        <androidx.cardview.widget.CardView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/grid1"
+            app:cardCornerRadius="@dimen/standard_corner_radius">
+
+            <ImageView
+                android:id="@+id/logo"
+                android:layout_width="@dimen/standard_image"
+                android:layout_height="@dimen/standard_image"
+                android:scaleType="centerCrop"
+                android:src="@drawable/default_user"/>
         </androidx.cardview.widget.CardView>
 
         <TextView
             android:id="@+id/titleBar"
+            style="@style/Heading"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
             android:layout_marginLeft="@dimen/standard_image"
             android:paddingLeft="@dimen/grid3"
-            android:layout_gravity="center_vertical"
-            style="@style/Heading"
-            android:text="Home"/>
-        
+            android:text="Home" />
+
         <androidx.cardview.widget.CardView
             android:id="@+id/searchBar"
             android:layout_width="wrap_content"
@@ -50,6 +50,25 @@
             android:visibility="gone"
             android:layout_marginLeft="60dp"
             android:layout_marginStart="60dp">
+
+            <androidx.cardview.widget.CardView
+                android:id="@+id/toggleCardView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:layout_marginLeft="60dp"
+                android:layout_marginStart="60dp"
+                app:cardCornerRadius="@dimen/standard_corner_radius"
+                android:visibility="gone"
+                android:layout_gravity="center_vertical">
+
+                <Switch
+                    android:id="@+id/toggleBulletMode"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Bullet Mode"
+                    android:checked="false" />
+            </androidx.cardview.widget.CardView>
 
             <EditText
                 android:id="@+id/search"
@@ -64,8 +83,8 @@
                 android:drawableRight="@android:drawable/ic_menu_search"
                 android:drawableEnd="@android:drawable/ic_menu_search"
                 android:imeOptions="actionSearch"
-                android:inputType="text"/>
-
+                android:inputType="text"
+                android:visibility="gone" />
         </androidx.cardview.widget.CardView>
 
     </androidx.cardview.widget.CardView>
@@ -129,6 +148,5 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
     </LinearLayout>
-
 
 </androidx.constraintlayout.widget.ConstraintLayout>
