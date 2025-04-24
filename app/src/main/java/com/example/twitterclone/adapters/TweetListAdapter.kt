@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.EditText
 import android.widget.ImageView
+import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.core.content.ContextCompat
@@ -76,6 +77,8 @@ class TweetListAdapter(
         private val retweetCount = v.findViewById<TextView>(R.id.tweetRetweetCount)
         private val comment = v.findViewById<ImageView>(R.id.tweetComment)
         private val commentInput = v.findViewById<EditText>(R.id.commentInput) // Comment input
+        private val commentArea = v.findViewById<LinearLayout>(R.id.commentArea) // Comment input
+//        private val commentList = v.findViewById<LinearLayout>(R.id.commentList)
 
         private var currentCommentText: String? = null // Store the typed comment text
 
@@ -90,6 +93,7 @@ class TweetListAdapter(
             // Show or hide the comment icon based on visibility flag
             comment.visibility = if (showComment) View.VISIBLE else View.GONE
             comment.setOnClickListener {
+                commentArea.visibility = if (commentArea.visibility == View.GONE) View.VISIBLE else View.GONE
                 // When comment icon is clicked, show the comment input field
                 commentInput.visibility = View.VISIBLE
 

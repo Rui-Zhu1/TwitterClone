@@ -40,7 +40,28 @@
         android:layout_marginTop="8dp"
         app:layout_constraintTop_toBottomOf="@id/tweetImage"/>
 
-    <!-- EditText for the comment, initially hidden -->
+    <!-- Comment Area: Light Yellow Background, placed directly under Tweet Date -->
+    <LinearLayout
+        android:id="@+id/commentArea"
+        android:layout_width="match_parent"
+        android:layout_height="120dp"
+        android:background="#FFFFE0"
+        android:visibility="gone"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:layout_marginTop="8dp"
+        app:layout_constraintTop_toBottomOf="@id/tweetDate">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Your comment will appear here"
+            android:textColor="@android:color/black"
+            android:gravity="center"
+            android:textSize="14sp"/>
+    </LinearLayout>
+
+    <!-- EditText for the comment (Initially hidden) -->
     <EditText
         android:id="@+id/commentInput"
         android:layout_width="match_parent"
@@ -49,7 +70,7 @@
         android:visibility="gone"
         android:inputType="text"
         android:layout_marginTop="8dp"
-        app:layout_constraintTop_toBottomOf="@id/tweetDate"/>
+        app:layout_constraintTop_toBottomOf="@id/commentArea"/>
 
     <LinearLayout
         android:layout_width="match_parent"
